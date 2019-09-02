@@ -67,7 +67,8 @@ module Coercible
     # @api private
     def self.configurable_coercers(&block)
       Coercer::Object.descendants.select { |descendant|
-        descendant.respond_to?(:config)
+        descendant.respond_to?(:config) && \
+          descendant.method(:config).owner == ::Coercible::Coercer::Configurable
       }
     end
     private_class_method :configurable_coercers
