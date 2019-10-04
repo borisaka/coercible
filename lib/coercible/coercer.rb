@@ -1,16 +1,5 @@
 module Coercible
-
-  # Coercer object
-  #
-  #
-  # @example
-  #
-  #   coercer = Coercible::Coercer.new
-  #
-  #   coercer[String].to_boolean('yes') # => true
-  #   coercer[Integer].to_string(1)     # => '1'
-  #
-  # @api public
+  # Just monkeypatch was not enough
   class Coercer
 
     # Return coercer instances
@@ -68,7 +57,7 @@ module Coercible
     def self.configurable_coercers(&block)
       Coercer::Object.descendants.select { |descendant|
         descendant.respond_to?(:config) && \
-          descendant.method(:config).owner == ::Coercible::Coercer::Configurable
+          descendant.method(:config).owner == Coercer::Configurable
       }
     end
     private_class_method :configurable_coercers
@@ -118,7 +107,9 @@ module Coercible
         begin
           coercer = Coercer::Object.determine_type(klass) || Coercer::Object
           args    = [ self ]
-          args   << config_for(coercer) if coercer.respond_to?(:config_name)
+          if coercer.respond_to?(:config_name) && coercer.method(:config).owner == Coercer::Configurable
+            args  << config_for(coercer) 
+          end
           coercer.new(*args)
         end
     end
